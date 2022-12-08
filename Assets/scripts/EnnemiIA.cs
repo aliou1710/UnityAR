@@ -49,7 +49,7 @@ public class EnnemiIA : MonoBehaviour
     void Update()
     {
         // Play something  if an object is within the sphere's radius.
-        playerInSightRange = Physics.CheckSphere(transform.position, sightRange, WhatIsPlayer );
+        playerInSightRange =  Physics.CheckSphere(transform.position, sightRange, WhatIsPlayer );
         playerInAttackRange = Physics.CheckSphere(transform.position, attackrange, WhatIsPlayer);
         if(!playerInSightRange && !playerInAttackRange)
         {
@@ -110,7 +110,7 @@ public class EnnemiIA : MonoBehaviour
         float randomX = UnityEngine.Random.Range(-walkPointRange, walkPointRange);
         float randomZ = UnityEngine.Random.Range(-walkPointRange, walkPointRange);
         walkPoint = new Vector3(transform.position.x + randomX, transform.position.z + randomZ);
-        if(Physics.Raycast(walkPoint,-transform.up, 2f, WhatisGround))
+        if (Physics.Raycast(walkPoint, -transform.up, 2f, WhatisGround))
         {
             walkPointSet = true;
         }
