@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class Grid : MonoBehaviour
+public class Grid :MonoBehaviour
 {
 
-    private int rows = 100;
-    private int cols = 100;
+    private int rows = 10;
+    private int cols = 10;
     private float cellSize;
-    public static bool[,] Matrix = new bool[100, 100];
+    public static bool[,] Matrix = new bool[4, 4];
     private int previousPosx;
     private int previousPosy;
 
@@ -20,14 +20,8 @@ public class Grid : MonoBehaviour
     private int scale = 1;
 
 
-    void Start()
-    {
-
-        CreateGrid();
-        //position bloc
-        // Matrix[5, 5] = true;
-    }
-    public void CreateGrid()
+   
+    public int CreateGrid()
     {
 
         // gridplane = new GameObject[rows, cols];
@@ -43,8 +37,13 @@ public class Grid : MonoBehaviour
             }
         }
 
+        return Matrix.GetLength(0);
     }
 
+    public static int GetLengthRows()
+    {
+        return Matrix.GetLength(0);
+    }
     //changer la position du bloc 
     public void setPositionObject(GameObject bloc, bool isSetPosition)
     {

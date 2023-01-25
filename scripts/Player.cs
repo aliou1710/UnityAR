@@ -5,9 +5,16 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using TMPro;
 
 public class Player :  MonoBehaviour, IPointerUpHandler, IDragHandler
 {
+
+    public Image ImageGameOver;
+    public Slider slider;
+    public TextMeshProUGUI scoreUI; 
+
     public FixedJoystick _joystick;
     public  Rigidbody playerBody;
 
@@ -15,10 +22,11 @@ public class Player :  MonoBehaviour, IPointerUpHandler, IDragHandler
     private float moveSpeed = 0.0015f;
     //mettre les attribut : e qui permet de caractériser les objets
     private Animator animator;
-        private String name = "ali";
-        private double life = 5;
-        private double attack = 1;
+    private String name = "ali";
+    private double life = 10;
+    private double attack = 1;
 
+    public  static int score = 0; 
 
 
     //  public float timer = 1000000;
@@ -31,6 +39,11 @@ public class Player :  MonoBehaviour, IPointerUpHandler, IDragHandler
     //button
     private Button btn;
 
+    //boudaries
+    private int boundaryXinf = -500;
+    private int boundaryYinf = -500;
+    private int boundaryXsup = 500;
+    private int boundaryYsup = 500;
 
 
 
@@ -40,7 +53,9 @@ public class Player :  MonoBehaviour, IPointerUpHandler, IDragHandler
 
     private void Start()
     {
-
+        //on modifie la valeur maximal du slider
+        slider.maxValue =(float) life;
+        scoreUI.text = "0 Points";
         // inputtext = GameObject.Find("input").GetComponent<TMP_InputField>();
         // inputsecond = GameObject.Find("inputsc").GetComponent<TMP_InputField>();
        
@@ -154,7 +169,9 @@ public class Player :  MonoBehaviour, IPointerUpHandler, IDragHandler
         yield return new WaitForSeconds(5f);
         //isCheckIdle = false;
         this.life -= damage;
-        isCheckBehitted = false;
+        slider.gameObject.SetActive(false);
+        scoreUI.gameObject.SetActive(false);
+        ImageGameOver.gameObject.SetActive(true);
 
 
 
@@ -169,9 +186,16 @@ public class Player :  MonoBehaviour, IPointerUpHandler, IDragHandler
         animator.Play("dead");
       
         yield return new WaitForSeconds(5f);
-      
+
+        GameOverScriipt gameover = new GameOverScriipt();
+        gameover.Setup(score);
+
+        Image img  = GameObject.Find("input").GetComponent<Image>();
+        
 
         Destroy(this.gameObject);
+
+
     }
 
 
@@ -249,9 +273,33 @@ public class Player :  MonoBehaviour, IPointerUpHandler, IDragHandler
    
     private void Update()
     {
-       if(isCheckDie == false)
+        //Score
+        scoreUI.text = score.ToString() + " Points";
+
+
+        if (isCheckDie == false)
         {
             UpdateMoov();
+        }
+       
+        
+
+       //frontière à respecter
+        if (transform.position.x < boundaryXinf )
+        {
+            transform.position = new Vector3(boundaryXinf, transform.position.y, transform.position.z);
+        }else if( transform.position.y < boundaryYinf)
+        {
+            transform.position = new Vector3(transform.position.x, transform.position.y, boundaryYinf);
+        }
+
+        if (transform.position.x > boundaryXsup)
+        {
+            transform.position = new Vector3(boundaryXsup, transform.position.y, transform.position.z);
+        }
+        else if (transform.position.y > boundaryYsup)
+        {
+            transform.position = new Vector3(boundaryYsup, transform.position.y, transform.position.z);
         }
      
     }
@@ -266,15 +314,33 @@ public class Player :  MonoBehaviour, IPointerUpHandler, IDragHandler
         {
          
             Destroy(collision.gameObject);
-            damageattack(1f);
-
+            damageattack(Ennemi2.damageValueOnPlayer);
+            reducelifeSlider(Ennemi2.damageValueOnPlayer);
 
         }
+        else if (collision.transform.tag == "Ennemi1")
+        {
+            damageattack(Ennemi1.damageValueOnPlayer);
+            reducelifeSlider(Ennemi1.damageValueOnPlayer);
+        }
+
+       
 
     }
 
    
-
+    public void reducelifeSlider(int value)
+    {
+        if((slider.value - value) < 0)
+        {
+            slider.value = 0;
+        }
+        else
+        {
+            slider.value -= value;
+        }
+        
+    }
     public void OnDrag(PointerEventData eventData)
     {
         // UpdateMoov();
@@ -300,9 +366,5 @@ public class Player :  MonoBehaviour, IPointerUpHandler, IDragHandler
 
    
 
-
-
-
-    // Start is called before the first frame update
 
 }

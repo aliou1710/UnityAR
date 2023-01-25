@@ -39,14 +39,20 @@ public class PlacementPlayersAR : MonoBehaviour
 
     //bloc
     public GameObject bloc;
-    private GameObject blocObject;
+    public static  GameObject blocObject;
 
+    //boudaries
+    private int boundaryXinf = -500;
+    private int boundaryYinf = -500;
+    private int boundaryXsup = 500;
+    private int boundaryYsup = 500;
 
+    private TMP_InputField inputsecond;
     void Start()
     {
         aRRaycastManager = FindObjectOfType<ARRaycastManager>();
         //inputtext = GameObject.Find("input").GetComponent<TMP_InputField>();
-        //inputsecond = GameObject.Find("inputsc").GetComponent<TMP_InputField>();
+        inputsecond = GameObject.Find("inputscc").GetComponent<TMP_InputField>();
        // placementPosesec = GameObject.Find("PlacementIndic").GetComponent<Pose>();
         ennemi2s = new List<Ennemi2>();
         ennemi1s = new List<Ennemi1>();
@@ -61,43 +67,99 @@ public class PlacementPlayersAR : MonoBehaviour
     int countsec = 0;//compteur pour l'ennemi 2
     int countfs = 0;//compteur pour l'ennemi 1
 
+
+    public Vector3 generateRandomPosition(Vector3 position,float radius)
+    {
+       // int radius = 1;
+        Vector3 center = PlacementPose.position;
+        Vector3 randomPos = center + Random.insideUnitSphere * radius;
+
+        return randomPos;
+    }
     void Update()
     {
         //player
         if (spawnedOject == null && placementPoseIsValid && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
        {
-             ARPlaceObject();
-            //spawnedOject.gameObject.SetActive(false);
-           //Destroy(spawnedOject.gameObject);
-            JoysticMovementControl.spawnedOject = spawnedOject;
-            Ennemi1.player = spawnedOject;
-            Ennemi2.player = spawnedOject;
-            CreationActionButton.player = spawnedOject;
-           
 
+            if (spawnedOject == null)
+            {
+                ARPlaceObject();
+                //spawnedOject.gameObject.SetActive(false);
+                //Destroy(spawnedOject.gameObject);
+                JoysticMovementControl.spawnedOject = spawnedOject;
+                Ennemi1.player = spawnedOject;
+                Ennemi2.player = spawnedOject;
+                CreationActionButton.player = spawnedOject;
+            }
 
-        
-
-          }
-        //ennemi 2
-       /* else if (spawnedOject != null && secEnnemi == null && placementPoseIsValid && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && countfs < nbreEnnemi)
-         // if (secEnnemi == null && placementPoseIsValid && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && countfs < nbreEnnemi)
-        {
-         //   ARPlaceObject();
-              secEnnemi = Instantiate(arObjectTOSpawnEnnemisec, PlacementPose.position, PlacementPose.rotation);
-              ennemi2s.Add(secEnnemi);
-         //   spawnedOject=null;
-
-                  secEnnemi = null;
-                  countfs++;
+            // int radius = 1;
+            //Vector3 center = PlacementPose.position;
+            // Vector3 center = new Vector3(PlacementPose.position.x, 100, PlacementPose.position.z);
+            // Vector3 randomPos = center + Random.insideUnitSphere * radius;
+            if(firstEnnemi == null)
+            {
+                Vector3 vector_enone = generateRandomPosition(PlacementPose.position, 1);
+                firstEnnemi = Instantiate(arObjectTOSpawnEnnemifirst, vector_enone, PlacementPose.rotation);
+            }
             
-          }*/
+            if(secEnnemi == null)
+            {
+                Vector3 vector_ensecond = generateRandomPosition(PlacementPose.position, 1.1f);
+                secEnnemi = Instantiate(arObjectTOSpawnEnnemisec, vector_ensecond, PlacementPose.rotation);
+            }
+            
+           
+            
+            inputsecond.text = PlacementPose.position.ToString();
+
+            if (treasure == null) {
+                //si le tresor n'a pas été instancié
+                if (secEnnemi != null && firstEnnemi != null )
+                {   
+                    //si les deux ennemis ont été instancié , alors le tresor sera instancié aux alentours du second ennemi
+                    Vector3 vector_treasure = generateRandomPosition(secEnnemi.transform.position, 0.6f);
+                    treasure = Instantiate(treasurehint, vector_treasure, PlacementPose.rotation);
+                } 
+                else if (secEnnemi != null && firstEnnemi == null)
+                {
+                    //si les 1er  ennemis n'a ps  été instancié , alors le tresor sera instancié aux alentours du second ennemi
+                    Vector3 vector_treasure = generateRandomPosition(secEnnemi.transform.position, 0.6f);
+                    treasure = Instantiate(treasurehint, vector_treasure, PlacementPose.rotation);
+                }
+                else if(secEnnemi == null && firstEnnemi != null)
+                {  
+                    //si les 2eme  ennemis n'a ps  été instancié , alors le tresor sera instancié aux alentours du 1er ennemi
+                    Vector3 vector_treasure = generateRandomPosition(firstEnnemi.transform.position, 0.6f);
+                    treasure = Instantiate(treasurehint, vector_treasure, PlacementPose.rotation);
+                }
+            }
+            // treasure = Instantiate(treasurehint, vector_ensecond, PlacementPose.rotation);
+            Ennemi2.projectileEnnemi = projectile;
+            CreationActionButton.projectileEnnemi = projectile;
+
+            // blocObject = Instantiate(bloc, PlacementPose.position, PlacementPose.rotation);
+            //position du bloc 
+        }
+        //ennemi 2
+        /* else if (spawnedOject != null && secEnnemi == null && placementPoseIsValid && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && countfs < nbreEnnemi)
+          // if (secEnnemi == null && placementPoseIsValid && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && countfs < nbreEnnemi)
+         {
+          //   ARPlaceObject();
+               secEnnemi = Instantiate(arObjectTOSpawnEnnemisec, PlacementPose.position, PlacementPose.rotation);
+               ennemi2s.Add(secEnnemi);
+          //   spawnedOject=null;
+
+                   secEnnemi = null;
+                   countfs++;
+
+           }*/
         //ennemi 1
-        else if (spawnedOject != null  && firstEnnemi == null && placementPoseIsValid && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && countfs < nbreEnnemi)
+        /*else if (spawnedOject != null  && firstEnnemi == null && placementPoseIsValid && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && countfs < nbreEnnemi)
         {
 
-            firstEnnemi = Instantiate(arObjectTOSpawnEnnemifirst, PlacementPose.position, PlacementPose.rotation);
-            ennemi1s.Add(firstEnnemi);
+           // firstEnnemi = Instantiate(arObjectTOSpawnEnnemifirst, PlacementPose.position, PlacementPose.rotation);
+            //ennemi1s.Add(firstEnnemi);
 
 
             firstEnnemi = null;
@@ -106,29 +168,63 @@ public class PlacementPlayersAR : MonoBehaviour
 
 
 
-        }
+        }*/
         //projectile et treasure
-        else if(spawnedOject != null && secEnnemi == null && treasure == null && placementPoseIsValid && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && countfs == nbreEnnemi)
+        /*else if(spawnedOject != null && secEnnemi == null && treasure == null && placementPoseIsValid && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && countfs == nbreEnnemi)
         
         {
+            //float rx = Random.Range(boundaryXinf, boundaryXsup);
+            //float ry = Random.Range(boundaryYinf, boundaryYsup);
+            //Vector3 v = new Vector3(rx, spawnedOject.transform.position.y, ry);
+            //treasure = Instantiate(treasurehint,v,Quaternion.identity) ;
+            //treasure = Instantiate(treasurehint, PlacementPose.position, PlacementPose.rotation);
 
-            treasure = Instantiate(treasurehint, PlacementPose.position, PlacementPose.rotation);
+           // blocObject = Instantiate(bloc, PlacementPose.position, PlacementPose.rotation);
+            //position du bloc 
+            
 
-            blocObject = Instantiate(bloc, PlacementPose.position, PlacementPose.rotation);
+
             Ennemi2.projectileEnnemi = projectile;
             CreationActionButton.projectileEnnemi = projectile;
-            treasure = null;
+            //treasure = null;
             countfs++;
 
 
 
 
-        }
-        
+        }*/
+
+
+        //position du bloc apres la condition(dans l'update)
+
+
+
 
         UpdatePlacementPose();
         UpdatePlacementIndicator();
 
+    }
+
+    public void boundariesMethod()
+    {
+    
+        if (transform.position.x < boundaryXinf)
+        {
+            transform.position = new Vector3(boundaryXinf, transform.position.y, transform.position.z);
+        }
+        else if (transform.position.y < boundaryYinf)
+        {
+            transform.position = new Vector3(transform.position.x, transform.position.y, boundaryYinf);
+        }
+
+        if (transform.position.x > boundaryXsup)
+        {
+            transform.position = new Vector3(boundaryXsup, transform.position.y, transform.position.z);
+        }
+        else if (transform.position.y > boundaryYsup)
+        {
+            transform.position = new Vector3(boundaryYsup, transform.position.y, transform.position.z);
+        }
     }
     void UpdatePlacementPose()
     {

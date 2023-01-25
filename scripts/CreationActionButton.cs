@@ -8,7 +8,7 @@ public class CreationActionButton : MonoBehaviour
 {
     // Start is called before the first frame update
     private Button btn;
-    private Button btnsecond;
+    
     private Animator animator;
     public static Player player;
     public static Ball projectileEnnemi;
@@ -17,8 +17,8 @@ public class CreationActionButton : MonoBehaviour
     {
         btn = GameObject.Find("Button01").GetComponent<Button>();
         btn.onClick.AddListener(KickFunction);
-        btnsecond = GameObject.Find("Button02").GetComponent<Button>();
-        btnsecond.onClick.AddListener(UppercutFunction);
+       // btnsecond = GameObject.Find("Button02").GetComponent<Button>();
+        //btnsecond.onClick.AddListener(UppercutFunction);
 
     }
 

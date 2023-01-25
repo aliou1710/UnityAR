@@ -3,17 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using System.Threading;
+using UnityEngine.UI;
 
 public class Ennemi1 : MonoBehaviour
 {
     // Start is called before the first frame update
     private String name = "ennemi1";
-    private double life = 20;
+    private double life = 50;
+    public static int damageValueOnPlayer = 3;
+    private int damageValue = 3; 
     private double attack = 1;
     private float speed=0.5f;
     public static Player player;
     private Animator animator;
-    private List<Vector2> listnodes = null;
+   // private List<Vector2> listnodes = null;
 
     //***IA***
     public bool isPlayerinSightRange, isPlayerInAttackRange;
@@ -22,22 +26,21 @@ public class Ennemi1 : MonoBehaviour
     public float walkPointRange=2f ;
     public bool isCheckIfBFSfinish = false;
 
+    TMP_InputField inputtext;
+    TMP_InputField inputsecond;
 
+    private Button btnsecond;
+
+    private Thread Thread;
     //constructeur
-    public Ennemi1()
-    {
-
-    }
+    public static List<Vector2Int> listnodes = null;
 
 
-    public Ennemi1(String name, double attack, double life)
-    {
-        //cvd ce qu'on va entrer en paramètre dans ce constructeur correspondra au nouveau name , nouveau life et au nive attack de ce jnouveau joueur
-        this.name = name;
-        this.attack = attack;
-        this.life = life;
-
-    }
+    //boudaries
+    private int boundaryXinf = -500;
+    private int boundaryYinf = -500;
+    private int boundaryXsup = 500;
+    private int boundaryYsup = 500;
 
     //fonction pour modifier le nom et pour le recuperer:
     //getteur: permet de recuperer le nom et le setteur permet de le modifier 
@@ -91,11 +94,12 @@ public class Ennemi1 : MonoBehaviour
         {
             if (((Vector2)transform.position != listnodes[index]))
             {
-               // inputtext.text = listnodes[index].ToString();
-
+                // inputtext.text = listnodes[index].ToString();
+                Vector3 vlist = new Vector3(listnodes[index].x, 0,listnodes[index].y) ;
                 var steps = 0.1f * Time.deltaTime;
-                transform.position = Vector3.MoveTowards(transform.position, listnodes[index], steps);
-                transform.LookAt(listnodes[index]);
+                // transform.position = Vector2.MoveTowards(transform.position, listnodes[index], steps);
+                transform.position = Vector3.MoveTowards(transform.position, vlist, steps);
+                transform.LookAt(vlist);
                 animator = this.GetComponent<Animator>();
                 animator.Play("walkee1");
 
@@ -117,20 +121,13 @@ public class Ennemi1 : MonoBehaviour
     bool isSeenPlayer = false;
     bool isWalking = false;
    
-
+   
     void checkPositionBetweenEnnemiAndPlayer()
     {
-        /*
-         inputtext.text = "";
-        BFS bfs = new BFS();
-        inputtext.text += bfs.getNameBFS();
-        bfs.checkupDfs(transform.position, player.transform.position);
-        listnodes = bfs.getPathsDfs();
-
-         */
 
         //patrouille après une certaine distance
         if ((player.transform.position - transform.position).sqrMagnitude < 0.5)
+        //if ((player.transform.position - transform.position).sqrMagnitude < MainMenu.valuePatrouille)
         {
             isPlayerinSightRange = true;
         }
@@ -141,6 +138,7 @@ public class Ennemi1 : MonoBehaviour
 
         //aatacker à une certaine distance
         if ((player.transform.position - transform.position).sqrMagnitude < 0.1)
+        //if ((player.transform.position - transform.position).sqrMagnitude < MainMenu.valueAttack)
         {
             isPlayerInAttackRange = true;
            
@@ -154,11 +152,28 @@ public class Ennemi1 : MonoBehaviour
 
     private void Start()
     {
-  
+        
+     
+
+      //  inputtext = GameObject.Find("input").GetComponent<TMP_InputField>();
+      //  inputtext.text = "start"+ "   "+ Grid.Matrix[10,10].ToString();
+
+        // btnsecond = GameObject.Find("Button02").GetComponent<Button>();
+        // btnsecond.onClick.AddListener(func);
+       
+
+
+
     }
     private void Update()
     {
 
+        ConnexionAsync.startpos.x = (int)this.transform.position.x;
+        ConnexionAsync.startpos.y = (int)this.transform.position.y;
+        ConnexionAsync.endpos.x = (int)player.transform.position.x;
+        ConnexionAsync.endpos.y = (int)player.transform.position.y;
+      //  func();
+      //  inputtext.text = msg;
         checkPositionBetweenEnnemiAndPlayer();
         if (!isPlayerinSightRange && !isPlayerInAttackRange)
         {
@@ -176,12 +191,32 @@ public class Ennemi1 : MonoBehaviour
             ChasePlayer();
 
         }
-       
 
+
+        boundariesMethod();
     }
 
  
+    public void boundariesMethod()
+    {
+        if (transform.position.x < boundaryXinf)
+        {
+            transform.position = new Vector3(boundaryXinf, transform.position.y, transform.position.z);
+        }
+        else if (transform.position.y < boundaryYinf)
+        {
+            transform.position = new Vector3(transform.position.x, transform.position.y, boundaryYinf);
+        }
 
+        if (transform.position.x > boundaryXsup)
+        {
+            transform.position = new Vector3(boundaryXsup, transform.position.y, transform.position.z);
+        }
+        else if (transform.position.y > boundaryYsup)
+        {
+            transform.position = new Vector3(boundaryYsup, transform.position.y, transform.position.z);
+        }
+    }
    
 
     public void checkPositionIntermediair()
@@ -261,6 +296,7 @@ public class Ennemi1 : MonoBehaviour
        
     }
 
+    //poursuivre le player
     private void ChasePlayer()
     {
         float steps = 0.4f * Time.deltaTime;
@@ -271,6 +307,9 @@ public class Ennemi1 : MonoBehaviour
         animator.Play("attacke1");
     }
 
+
+
+    //reduire la vie du l'ennemi1
     public void damageattack(double damage)
     {
         
@@ -289,6 +328,9 @@ public class Ennemi1 : MonoBehaviour
         }
     }
 
+
+
+    //entrer en collsions 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.transform.tag == "ball")

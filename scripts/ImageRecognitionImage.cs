@@ -45,6 +45,6 @@ public class ImageRecognitionImage : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        inputtext.text = "Update";
+        //inputtext.text = "Update";
     }
 }

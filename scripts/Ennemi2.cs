@@ -13,6 +13,8 @@ public class Ennemi2 : MonoBehaviour
     // Start is called before the first frame update
     private String name = "ennemi2";
     private double life = 20;
+    private int damageValue = 3;
+    public static int damageValueOnPlayer = 10;
     private double attack = 1;
     public static Player player;
     private Animator animator;
@@ -311,7 +313,7 @@ public class Ennemi2 : MonoBehaviour
                animator = transform.GetComponent<Animator>();
                animator.Play("behitted2");
 
-          //  damageattack(0.2f);
+            damageattack(damageValue);
             Destroy(collision.gameObject);
            
            

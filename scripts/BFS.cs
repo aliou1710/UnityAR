@@ -1,66 +1,138 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class BFS : MonoBehaviour
 {
+
     // Start is called before the first frame update
     private int bestLength;
     //je cree une paire de liste pour stocker chaque valeur et le chemin parcouru
-    Queue<KeyValuePair<List<Vector2>, Vector2>> integer_stack = null;
+    Queue<KeyValuePair<List<Vector2Int>, Vector2Int>> integer_stack = null;
 
-    private List<Vector2> listcheckoutLength = null;
+    private List<Vector2Int> listcheckoutLength = null;
     bool[,] tarray;
-    Vector2 endvalue;
-    Vector2 beginvalue;
+    Vector2Int endvalue;
+    Vector2Int beginvalue;
     public static BFS dfs;
-    int[] dx = { -1, 1, 0, 0, -1, -1, 1, 1 };
-    int[] dy = { 0, 0, -1, 1, -1, 1, -1, 1 };
+    private float cellSize;
+    private int previousPosx;
+    private int previousPosy;
+    //tous les côtés
+    /*int[] dx = { -1, 1, 0, 0, -1, -1, 1, 1 };
+    int[] dy = { 0, 0, -1, 1, -1, 1, -1, 1 };*/
+    int[] dx = { -1, 1, 0, 0 };
+    int[] dy = { 0, 0, -1, 1 };
+
+    TMP_InputField inputtext;
+    TMP_InputField inputsecond;
     List<(int x, int y)> listcheckoutLength_;
 
     int rows = 100;
     int cols = 100;
+    public static bool[,] Matrix = new bool[100, 100];
 
-
-    Vector2 v = new Vector2(1, 1);
-    Vector2 v2 = new Vector2(50, 50);
+    Vector2Int v = new Vector2Int(1, 1);
+    Vector2Int v2 = new Vector2Int(20, 20);
     bool isCheckifDFS = false;
 
 
     void Start()
     {
+        CreateGrid();
+        inputtext = GameObject.Find("input").GetComponent<TMP_InputField>();
+        inputtext.text = "start";
 
+
+     
+            Debug.Log("message ");
+            isCheckifDFS = true;
+
+            checkupDfs(v, v2);
+            List<Vector2Int> path = getPathsDfs();
+           
+                string msg = "(";
+                foreach (var item in path)
+                {
+                    msg += item.ToString() + ",";
+                }
+                msg += ")";
+                Debug.Log(msg);
+            inputtext.text = msg.ToString();
+        listcheckoutLength.Clear();
+            
+          
+        
+
+
+
+
+
+      
     }
 
     // Update is called once per frame
     void Update()
     {
-
-
+        
 
     }
-    public string getNameBFS()
+
+    public void CreateGrid()
     {
-        return "bfs";
+
+        // gridplane = new GameObject[rows, cols];
+        //Matrix = new bool[100, 100];
+
+        for (int x = 0; x < Matrix.GetLength(0); x++)
+        {
+            for (int y = 0; y < Matrix.GetLength(1); y++)
+            {
+                Matrix[x, y] = false;
+
+            }
+        }
     }
-    public List<Vector2> getPathsDfs()
+
+    public List<Vector2Int> getPathsDfs()
     {
         return this.listcheckoutLength;
     }
+    private Vector3 GetWorldPosition(int x, int y)
+    {
+        return new Vector3(x, y) * cellSize;
+    }
 
-    public void checkupDfs(Vector2 _begin, Vector2 endvalue)
+    private void setPreviousPositionToFalse()
+    {
+
+        Matrix[previousPosx, previousPosy] = false;
+    }
+
+    public static bool GetPositionMatrix(int i, int j)
+    {   //je mets à true , parceque si on depasse les limite on considere qu'on ajoute rien dans la liste
+        bool isFind = true;
+        if (i < Matrix.GetLength(0) && j < Matrix.GetLength(1))
+        {
+            isFind = Matrix[i, j];
+        }
+        return isFind;
+    }
+
+    public void checkupDfs(Vector2Int _begin, Vector2Int endvalue)
     {
 
         // path = new List<Vector2>();
         beginvalue = _begin;
         //Vector2 endvalue = _end;
 
-        listcheckoutLength = new List<Vector2>();
-        List<Vector2> lists = new List<Vector2>();
+        listcheckoutLength = new List<Vector2Int>();
+        List<Vector2Int> lists = new List<Vector2Int>();
         lists.Add(_begin);
         integer_stack = null;
-        integer_stack = new Queue<KeyValuePair<List<Vector2>, Vector2>>();
-        integer_stack.Enqueue(new KeyValuePair<List<Vector2>, Vector2>(lists, _begin));
+        integer_stack = new Queue<KeyValuePair<List<Vector2Int>, Vector2Int>>();
+        integer_stack.Enqueue(new KeyValuePair<List<Vector2Int>, Vector2Int>(lists, _begin));
 
         tarray = new bool[rows, cols];
         //create array for checking if node has been visited
@@ -103,7 +175,7 @@ public class BFS : MonoBehaviour
     }
 
 
-    public void DFSmethods(Vector2 endvalue)
+    public void DFSmethods(Vector2Int endvalue)
     {
         while (integer_stack.Count != 0 && tarray[(int)endvalue.x, (int)endvalue.y] == false)
         {
@@ -111,9 +183,9 @@ public class BFS : MonoBehaviour
             //KeyValuePair<List<Vector2>, Vector2> tmp = integer_stack.Peek();//on recupere la derniere paire d'elements du stack (qui est le Top)
             //top element in the stack (warning: the top element is the last element added in stack)
 
-            KeyValuePair<List<Vector2>, Vector2> tmp = integer_stack.Dequeue(); // remove the top element
-                                                                                //top element in the stack (warning: the top element is the last element added in stack)
-            Vector2 v = tmp.Value;
+            KeyValuePair<List<Vector2Int>, Vector2Int> tmp = integer_stack.Dequeue(); // remove the top element
+                                                                                      //top element in the stack (warning: the top element is the last element added in stack)
+            Vector2Int v = tmp.Value;
             Debug.Log(integer_stack.Count);                   //Debug.Log(v.x.ToString() + ' ' + v.y.ToString());
 
 
@@ -134,7 +206,7 @@ public class BFS : MonoBehaviour
                         if (tmp.Key.Count < listcheckoutLength.Count)
                         {
                             //on fait un copy constructeur
-                            listcheckoutLength = new List<Vector2>(tmp.Key);
+                            listcheckoutLength = new List<Vector2Int>(tmp.Key);
                             bestLength = tmp.Key.Count;
 
                         }
@@ -142,7 +214,7 @@ public class BFS : MonoBehaviour
                     else
                     {//si la liste listcheckout est vide
 
-                        listcheckoutLength = new List<Vector2>(tmp.Key);
+                        listcheckoutLength = new List<Vector2Int>(tmp.Key);
 
 
                     }
@@ -155,7 +227,7 @@ public class BFS : MonoBehaviour
                     int valuey = (int)v.y;
                     // on ajoute tous les somments suivants de v dans le stack
 
-                    for (int j = 0; j < 8; ++j)
+                    for (int j = 0; j < dx.Length; ++j)
                     {
 
                         int next_x = valuex + dx[j];
@@ -167,18 +239,18 @@ public class BFS : MonoBehaviour
 
                             //copie de la liste
                             //listcheckoutLength = new List<Vector2>(tmp.Key);
-                            List<Vector2> tmpCopie = new List<Vector2>(tmp.Key);
+                            List<Vector2Int> tmpCopie = new List<Vector2Int>(tmp.Key);
                             //List<Vector2> tmpCopie = new List<Vector2>();
                             //tmpCopie = tmp.Key;
 
                             //on ajoute l'element j dans la liste
-                            Vector2 vq = new Vector2(next_x, next_y);
+                            Vector2Int vq = new Vector2Int(next_x, next_y);
 
                             tmpCopie.Add(vq);
                             //KeyValuePair<List<Vector2>, Vector2> tmp2 = new KeyValuePair<List<Vector2>, Vector2>(tmpCopie, vq);
                             // on ajoute cette paire dans le stack
                             //integer_stack.Push(tmp2);
-                            integer_stack.Enqueue(new KeyValuePair<List<Vector2>, Vector2>(tmpCopie, vq));
+                            integer_stack.Enqueue(new KeyValuePair<List<Vector2Int>, Vector2Int>(tmpCopie, vq));
                             tmpCopie = null;
 
 
